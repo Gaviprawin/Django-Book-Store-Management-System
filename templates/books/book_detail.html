@@ -1,0 +1,74 @@
+
+{% extends "base.html" %}
+
+{% block title %}{{ book.title }} | BookNest{% endblock %}
+
+{% block content %}
+<div class="mb-3">
+    <a href="{% url 'book-list' %}" class="text-decoration-none">
+        &larr; Back to Books
+    </a>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+    <div class="row g-0">
+        <div class="col-md-5">
+            {% if book.cover_image %}
+                <img src="{{ book.cover_image.url }}"
+                     class="detail-cover"
+                     alt="{{ book.title }}">
+            {% else %}
+                <div class="detail-cover placeholder-cover">
+                    <span>BOOKNEST</span>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="col-md-7">
+            <div class="card-body p-4 p-lg-5">
+                <span class="badge text-bg-primary mb-3">
+                    {{ book.category.name }}
+                </span>
+
+                <h1 class="fw-bold">{{ book.title }}</h1>
+                <p class="text-secondary fs-5">by {{ book.author }}</p>
+
+                <h2 class="text-primary fw-bold mb-4">
+                    ₹{{ book.price|floatformat:2 }}
+                </h2>
+                        {% if book.stock > 0 %}
+                    <form method="post" action="{% url 'cart-add' book.pk %}" class="mt-3">
+                        {% csrf_token %}
+
+                        <label for="quantity" class="form-label">Quantity</label>
+                        <input type="number" id="quantity" name="quantity"
+                            class="form-control mb-3"
+                            value="1" min="1" max="{{ book.stock }}" required>
+
+                        <button type="submit" class="btn btn-success">
+                            Add to Cart
+                        </button>
+                    </form>
+                    {% else %}
+                    <p class="text-danger">Currently out of stock.</p>
+                    {% endif %}
+                <h5>Description</h5>
+                <p>{{ book.description|linebreaksbr }}</p>
+
+                <p><strong>ISBN:</strong> {{ book.isbn }}</p>
+                <p><strong>Available stock:</strong> {{ book.stock }}</p>
+
+                {% if user.is_authenticated %}
+                    <div class="d-flex flex-wrap gap-2 mt-4">
+                        <a href="{% url 'book-update' book.pk %}"
+                           class="btn btn-primary">Edit Book</a>
+
+                        <a href="{% url 'book-delete' book.pk %}"
+                           class="btn btn-outline-danger">Delete Book</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
